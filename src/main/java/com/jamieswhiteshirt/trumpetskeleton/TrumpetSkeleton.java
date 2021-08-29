@@ -1,33 +1,26 @@
 package com.jamieswhiteshirt.trumpetskeleton;
 
+import com.jamieswhiteshirt.trumpetskeleton.client.ClientOps;
 import com.jamieswhiteshirt.trumpetskeleton.entities.TrumpetSkeletonEntity;
 import com.jamieswhiteshirt.trumpetskeleton.register.Entities;
 import com.jamieswhiteshirt.trumpetskeleton.register.Items;
 import com.jamieswhiteshirt.trumpetskeleton.register.SoundEvents;
-import net.minecraft.client.renderer.entity.SkeletonRenderer;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntitySpawnPlacementRegistry;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.monster.AbstractSkeletonEntity;
 import net.minecraft.entity.passive.ParrotEntity;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.biome.MobSpawnInfo;
 import net.minecraft.world.gen.Heightmap;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.world.BiomeLoadingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
@@ -44,9 +37,9 @@ public class TrumpetSkeleton {
         final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         modEventBus.addListener(this::setupCommon);
-        modEventBus.addListener(this::setupClient);
-        modEventBus.addListener(this::setupItemColours);
         modEventBus.addListener(Entities::setupStats);
+        modEventBus.addListener(ClientOps::setupClient);
+        modEventBus.addListener(ClientOps::setupItemColours);
         MinecraftForge.EVENT_BUS.addListener(this::setupSpawns);
 
         Entities.REGISTER.register(modEventBus);
@@ -54,24 +47,6 @@ public class TrumpetSkeleton {
         SoundEvents.REGISTER.register(modEventBus);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.CONFIG);
-    }
-
-    @SubscribeEvent
-    @OnlyIn(Dist.CLIENT)
-    public void setupClient(final FMLClientSetupEvent event) {
-        RenderingRegistry.registerEntityRenderingHandler(
-                Entities.TRUMPET_SKELETON_ENTITY.get(),
-                SkeletonRenderer::new
-        );
-    }
-
-    @SubscribeEvent
-    @OnlyIn(Dist.CLIENT)
-    public void setupItemColours(final ColorHandlerEvent.Item event) {
-        event.getItemColors().register(
-                (itemColor, itemsIn) -> Items.TRUMPET_SKELETON_SPAWN_EGG.get().getColor(itemsIn),
-                Items.TRUMPET_SKELETON_SPAWN_EGG.get()
-        );
     }
 
     @SubscribeEvent
