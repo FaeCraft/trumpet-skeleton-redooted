@@ -12,11 +12,13 @@ import net.minecraft.entity.passive.ParrotEntity;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.biome.MobSpawnInfo;
 import net.minecraft.world.gen.Heightmap;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.BiomeLoadingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -36,10 +38,12 @@ public class TrumpetSkeleton {
     public TrumpetSkeleton() {
         final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+            modEventBus.addListener(ClientOps::setupClient);
+            modEventBus.addListener(ClientOps::setupItemColours);
+        });
         modEventBus.addListener(this::setupCommon);
         modEventBus.addListener(Entities::setupStats);
-        modEventBus.addListener(ClientOps::setupClient);
-        modEventBus.addListener(ClientOps::setupItemColours);
         MinecraftForge.EVENT_BUS.addListener(this::setupSpawns);
 
         Entities.REGISTER.register(modEventBus);
