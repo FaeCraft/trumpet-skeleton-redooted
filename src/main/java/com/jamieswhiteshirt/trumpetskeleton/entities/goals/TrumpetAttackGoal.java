@@ -25,7 +25,7 @@ public class TrumpetAttackGoal<T extends MonsterEntity> extends Goal {
         this.attackInterval = attackInterval;
         this.squaredRange = range * range;
 
-        this.setMutexFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
 
     public void setAttackInterval(int attackInterval) {
@@ -33,8 +33,8 @@ public class TrumpetAttackGoal<T extends MonsterEntity> extends Goal {
     }
 
     @Override
-    public boolean shouldExecute() {
-        return actor.getAttackTarget() != null && isHoldingTrumpet();
+    public boolean canUse() {
+        return actor.getTarget() != null && isHoldingTrumpet();
     }
 
     protected boolean isHoldingTrumpet() {
@@ -42,22 +42,22 @@ public class TrumpetAttackGoal<T extends MonsterEntity> extends Goal {
     }
 
     @Override
-    public boolean shouldContinueExecuting() {
-        return (shouldExecute() || !actor.getNavigator().noPath()) && isHoldingTrumpet();
+    public boolean canContinueToUse() {
+        return (canUse() || !actor.getNavigation().isDone()) && isHoldingTrumpet();
     }
 
     @Override
-    public void startExecuting() {
-        super.startExecuting();
+    public void start() {
+        super.start();
 
-        actor.setAggroed(true);
+        actor.setAggressive(true);
     }
 
     @Override
-    public void resetTask() {
-        super.resetTask();
-        actor.setAggroed(false);
-        actor.resetActiveHand();
+    public void stop() {
+        super.stop();
+        actor.setAggressive(false);
+        actor.stopUsingItem();
 
         seeCounter = 0;
         cooldown = -1;
@@ -65,12 +65,12 @@ public class TrumpetAttackGoal<T extends MonsterEntity> extends Goal {
 
     @Override
     public void tick() {
-        LivingEntity target = actor.getAttackTarget();
+        LivingEntity target = actor.getTarget();
 
         if (target == null) return;
 
-        double squaredDistance = actor.getDistanceSq(target);
-        boolean canSeeTarget = actor.canEntityBeSeen(target);
+        double squaredDistance = actor.distanceToSqr(target);
+        boolean canSeeTarget = actor.canSee(target);
         boolean bool2 = seeCounter > 0;
 
         if (canSeeTarget != bool2) {
@@ -81,19 +81,19 @@ public class TrumpetAttackGoal<T extends MonsterEntity> extends Goal {
         else seeCounter -= 1;
 
         if (squaredDistance <= squaredRange && seeCounter >= 20) {
-            actor.getNavigator().clearPath();
+            actor.getNavigation().stop();
             strafeChangeTimer += 1;
         } else {
-            actor.getNavigator().tryMoveToEntityLiving(target, speed);
+            actor.getNavigation().moveTo(target, speed);
             strafeChangeTimer -= 1;
         }
 
         if (strafeChangeTimer >= 20) {
-            if (actor.world.rand.nextFloat() < 0.3) {
+            if (actor.level.random.nextFloat() < 0.3) {
                 strafeLeft = !strafeLeft;
             }
 
-            if (actor.world.rand.nextFloat() < 0.3) {
+            if (actor.level.random.nextFloat() < 0.3) {
                 strafeBack = !strafeBack;
             }
 
@@ -107,21 +107,21 @@ public class TrumpetAttackGoal<T extends MonsterEntity> extends Goal {
                 strafeBack = true;
             }
 
-            actor.getMoveHelper().strafe(
+            actor.getMoveControl().strafe(
                     strafeBack ? -0.5f : 0.5f,
                     strafeLeft ? 0.5f : -0.5f
             );
 
-            actor.getLookController().setLookPositionWithEntity(target, 30, 30);
+            actor.getLookControl().setLookAt(target, 30, 30);
         }
 
-        if (actor.isHandActive()) {
+        if (actor.isUsingItem()) {
             if (!canSeeTarget && seeCounter < -60) {
-                actor.resetActiveHand();
+                actor.stopUsingItem();
             }
         } else if (--cooldown <= 0 && seeCounter >= -60) {
-            actor.setActiveHand(ProjectileHelper.getHandWith(actor, Items.TRUMPET_ITEM.get()));
-            cooldown = actor.world.rand.nextInt(attackInterval);
+            actor.startUsingItem(ProjectileHelper.getWeaponHoldingHand(actor, Items.TRUMPET_ITEM.get()));
+            cooldown = actor.level.random.nextInt(attackInterval);
         }
     }
 }

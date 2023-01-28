@@ -18,8 +18,8 @@ public class Items {
 
             () -> new TrumpetItem(
                     new Item.Properties()
-                            .group(ItemGroup.MISC)
-                            .maxDamage(200)
+                            .tab(ItemGroup.TAB_MISC)
+                            .durability(200)
             )
     );
 
@@ -30,8 +30,7 @@ public class Items {
                     Entities.TRUMPET_SKELETON_ENTITY,
                     0xC1C1C1,
                     0xFCFC00,
-
-                    new Item.Properties().group(ItemGroup.MISC)
+                    new Item.Properties().tab(ItemGroup.TAB_MISC)
             )
     );
 }

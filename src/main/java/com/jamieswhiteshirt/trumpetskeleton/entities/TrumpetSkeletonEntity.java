@@ -20,15 +20,15 @@ public class TrumpetSkeletonEntity extends SkeletonEntity {
     private final TrumpetAttackGoal<TrumpetSkeletonEntity> trumpetAttackGoal = new TrumpetAttackGoal<>(this, 1, 40, 6);
     private final MeleeAttackGoal meleeAttackGoal = new MeleeAttackGoal(this, 1.2, false) {
         @Override
-        public void startExecuting() {
-            super.startExecuting();
-            setAggroed(true);
+        public void start() {
+            super.start();
+            setAggressive(true);
         }
 
         @Override
-        public void resetTask() {
-            super.resetTask();
-            setAggroed(false);
+        public void stop() {
+            super.stop();
+            setAggressive(false);
         }
     };
 
@@ -41,11 +41,11 @@ public class TrumpetSkeletonEntity extends SkeletonEntity {
     }
 
     @Override
-    protected void setEquipmentBasedOnDifficulty(DifficultyInstance difficulty) {
-        super.setEquipmentBasedOnDifficulty(difficulty);
+    protected void populateDefaultEquipmentSlots(DifficultyInstance difficulty) {
+        super.populateDefaultEquipmentSlots(difficulty);
 
-        setActiveHand(Hand.MAIN_HAND);
-        setItemStackToSlot(
+        startUsingItem(Hand.MAIN_HAND);
+        setItemSlot(
                 EquipmentSlotType.MAINHAND,
                 new ItemStack(Items.TRUMPET_ITEM.get())
         );
@@ -62,17 +62,17 @@ public class TrumpetSkeletonEntity extends SkeletonEntity {
     }
 
     @Override
-    public void setCombatTask() {
-        if (constructed && this.world != null && !this.world.isRemote) {
+    public void reassessWeaponGoal() {
+        if (constructed && this.level != null && !this.level.isClientSide) {
             goalSelector.removeGoal(meleeAttackGoal);
             goalSelector.removeGoal(trumpetAttackGoal);
 
-            ItemStack stack = getHeldItem(ProjectileHelper.getHandWith(this, Items.TRUMPET_ITEM.get()));
+            ItemStack stack = getItemInHand(ProjectileHelper.getWeaponHoldingHand(this, Items.TRUMPET_ITEM.get()));
 
             if (stack.getItem() == Items.TRUMPET_ITEM.get()) {
                 int attackInterval = 40;
 
-                if (world.getDifficulty() != Difficulty.HARD) {
+                if (level.getDifficulty() != Difficulty.HARD) {
                     attackInterval = 80;
                 }
 

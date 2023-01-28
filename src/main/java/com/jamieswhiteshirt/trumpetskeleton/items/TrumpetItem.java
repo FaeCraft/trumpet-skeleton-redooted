@@ -19,24 +19,24 @@ public class TrumpetItem extends Item {
     }
 
     public static void scare(World world, LivingEntity user) {
-        if (!world.isRemote) {
-            List<LivingEntity> spooked = world.getEntitiesWithinAABB(
+        if (!world.isClientSide()) {
+            List<LivingEntity> spooked = world.getEntitiesOfClass(
                     LivingEntity.class,
-                    user.getBoundingBox().grow(10.0)
+                    user.getBoundingBox().inflate(10.0)
             );
 
             for (LivingEntity entity : spooked) {
                 if (entity == user) continue;
 
-                double deltaX = entity.getPosX() - user.getPosX() + world.rand.nextDouble() - world.rand.nextDouble();
-                double deltaZ = entity.getPosZ() - user.getPosZ() + world.rand.nextDouble() - world.rand.nextDouble();
+                double deltaX = entity.getX() - user.getX() + world.random.nextDouble() - world.random.nextDouble();
+                double deltaZ = entity.getZ() - user.getZ() + world.random.nextDouble() - world.random.nextDouble();
 
                 double distance = Math.sqrt((deltaX * deltaX) + (deltaZ * deltaZ));
 
-                entity.velocityChanged = true;
-                entity.setRevengeTarget(user);
+                entity.hurtMarked = true;
+                entity.setLastHurtByMob(user);
 
-                entity.addVelocity(
+                entity.push(
                         0.5 * deltaX / distance,
                         5 / (10 + distance),
                         0.5 + deltaZ / distance
@@ -46,7 +46,7 @@ public class TrumpetItem extends Item {
     }
 
     @Override
-    public UseAction getUseAction(ItemStack stack) {
+    public UseAction getUseAnimation(ItemStack stack) {
         return UseAction.DRINK;
     }
 
@@ -56,7 +56,7 @@ public class TrumpetItem extends Item {
     }
 
     @Override
-    public SoundEvent getDrinkSound() {
+    public SoundEvent getDrinkingSound() {
         return null;
     }
 
@@ -67,17 +67,17 @@ public class TrumpetItem extends Item {
         int useTime = getUseDuration(stack) - count;
 
         if (useTime == 10) {
-            player.playSound(SoundEvents.TRUMPET_DOOT.get(), 1, 0.9F + player.world.rand.nextFloat() * 0.2F);
-            TrumpetItem.scare(player.world, player);
-            stack.damageItem(1, player, (entity) -> entity.sendBreakAnimation(entity.getActiveHand()));
+            player.playSound(SoundEvents.TRUMPET_DOOT.get(), 1, 0.9F + player.level.random.nextFloat() * 0.2F);
+            TrumpetItem.scare(player.level, player);
+            stack.hurtAndBreak(1, player, (entity) -> entity.broadcastBreakEvent(entity.getUsedItemHand()));
         } else if (useTime >= 15) {
-            player.stopActiveHand();
+            player.stopUsingItem();
         }
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
-        playerIn.setActiveHand(handIn);
-        return ActionResult.resultSuccess(playerIn.getHeldItem(handIn));
+    public ActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
+        playerIn.startUsingItem(handIn);
+        return ActionResult.success(playerIn.getItemInHand(handIn));
     }
 }

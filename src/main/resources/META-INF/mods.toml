@@ -1,20 +1,28 @@
 modLoader="javafml"
-loaderVersion="[31,)"
+loaderVersion="[36,)"
+license="MIT"
 
 [[mods]]
 modId="trumpetskeleton"
 version="${file.jarVersion}"
 displayName="Trumpet Skeleton"
 
-authors="JamiesWhiteShirt (port by gdude2002)"
+authors="JamiesWhiteShirt (port by gdude2002, patched by Tslat)"
 
 description='''
 The sound of trumpets echoes through the night...
 '''
 
 [[dependencies.trumpetskeleton]]
+    modId="forge"
+    mandatory=true
+    versionRange="[36.1.0,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.trumpetskeleton]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.15.2]"
+    versionRange="[1.16.5,)"
     ordering="NONE"
     side="BOTH"

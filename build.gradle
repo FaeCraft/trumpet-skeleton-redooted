@@ -1,38 +1,34 @@
 buildscript {
     repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
-        jcenter()
+        maven { url = 'https://maven.minecraftforge.net/' }
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
     }
 }
 
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'maven-publish'
 
-version = "1.15-1.1.1.2"
-group = "com.jamieswhiteshirt.trumpetskeleton" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+version = "1.16-1.1.2.5"
+group = "com.jamieswhiteshirt.trumpetskeleton"
 archivesBaseName = "trumpetskeleton"
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
 minecraft {
-    mappings channel: 'snapshot', version: '20200514-1.15.1'
+    mappings channel: 'official', version: '1.16.5'
 
     runs {
         client {
             workingDirectory project.file('run')
 
-            // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                examplemod {
+                trumpetskeleton {
                     source sourceSets.main
                 }
             }
@@ -41,32 +37,11 @@ minecraft {
         server {
             workingDirectory project.file('run')
 
-            // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                examplemod {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        data {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/')
-
-            mods {
-                examplemod {
+                trumpetskeleton {
                     source sourceSets.main
                 }
             }
@@ -75,7 +50,7 @@ minecraft {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.15.2-31.2.33'
+    minecraft 'net.minecraftforge:forge:1.16.5-36.1.0'
 }
 
 jar {
